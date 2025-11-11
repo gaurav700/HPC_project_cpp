@@ -1,0 +1,359 @@
+\documentclass[10pt,conference,compsocconf]{IEEEtran}
+
+% Use the `conference` option for conferences and `compsocconf` for Computer Society conferences
+\usepackage{cite}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{hyperref}
+
+\title{Performance Comparison of Parallel Matrix Multiplication Across CPU, MPI, and GPU Architectures}
+
+\author{
+    \IEEEauthorblockN{Gaurav Kumar}
+    \IEEEauthorblockA{Department of Computer Science\\
+    New Jersey Institute of Technology\\
+    Newark, NJ 07102\\
+    Email: gk@njit.edu}
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Matrix multiplication is a fundamental computational kernel in scientific computing and machine learning. This paper presents a comprehensive performance evaluation of matrix multiplication implementations across four parallel computing paradigms: Sequential (CPU baseline), OpenMP (shared-memory), MPI (distributed-memory), and CUDA (GPU acceleration) on modern heterogeneous hardware. We benchmark square matrix multiplication for problem sizes ranging from 500×500 to 4000×4000 on a workstation equipped with an Intel Core i5-11400H (6 cores) and NVIDIA GeForce RTX 3060 GPU. Our results demonstrate that GPU-accelerated CUDA achieves 2530× speedup over sequential CPU implementation on the largest test case, while shared-memory OpenMP and distributed-memory MPI achieve modest 3.8× and 3.6× speedups respectively. We provide detailed analysis of communication overhead, memory utilization, and computational efficiency, and offer practical guidelines for selecting the appropriate parallelization strategy based on problem characteristics and hardware constraints.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Parallel computing, matrix multiplication, GPU acceleration, CUDA, MPI, OpenMP, performance analysis, heterogeneous computing
+\end{IEEEkeywords}
+
+\section{Introduction}
+
+Matrix multiplication is one of the most computationally intensive operations in scientific computing, appearing in applications ranging from deep neural networks to climate simulations. With the advent of multi-core processors, GPUs, and distributed systems, understanding how to effectively parallelize this operation has become essential for practitioners.
+
+\subsection{Problem Statement}
+
+While parallelization can significantly accelerate computation, the relationship between problem size, hardware characteristics, and parallel algorithm choice is non-trivial. Each parallelization approach---shared-memory threading (OpenMP), distributed-memory message passing (MPI), and GPU acceleration (CUDA)---introduces different overheads and scalability characteristics.
+
+\subsection{Contributions}
+
+This paper provides:
+\begin{enumerate}
+    \item Comprehensive benchmarking of four parallelization strategies on identical hardware
+    \item Detailed analysis of performance scaling, efficiency, and variability
+    \item Empirical validation of theoretical scaling laws (Amdahl's Law)
+    \item Practical decision matrix for algorithm selection
+    \item Cross-implementation performance comparison
+\end{enumerate}
+
+\section{Related Work}
+
+\subsection{Classical Approaches}
+
+Strassen's algorithm reduces matrix multiplication complexity from $O(N^3)$ to $O(N^{2.807})$, though with significant constant factors that limit practical applicability~\cite{strassen1969gaussian}. Coppersmith-Winograd further improves to $O(N^{2.373})$ but remains impractical for real implementations~\cite{coppersmith1990matrix}.
+
+\subsection{GPU Acceleration}
+
+Volkov and Demmel demonstrated that carefully tuned GPU kernels can achieve near-peak performance through memory hierarchy optimization~\cite{volkov2008benchmarking}. Our tiling strategy implements a blocked algorithm that leverages shared memory to reduce global memory accesses by approximately 16×.
+
+\subsection{Distributed Computing}
+
+Cannon's algorithm provides a systematic approach to distributed matrix multiplication on processor grids with minimal communication overhead~\cite{cannon1969cellular}. MPI implementations typically follow row-based or block-based distribution schemes.
+
+\subsection{Scaling Analysis}
+
+Gustafson's Law suggests that weak scaling may be achievable where problem size grows with processor count~\cite{gustafson1988reevaluating}. We evaluate strong scaling (fixed problem size) in this work.
+
+\section{Experimental Methodology}
+
+\subsection{Hardware Configuration}
+
+\begin{table}[h]
+\centering
+\caption{Experimental Hardware Specifications}
+\label{tab:hardware}
+\begin{tabular}{ll}
+\toprule
+\textbf{Component} & \textbf{Specification} \\
+\midrule
+CPU & Intel Core i5-11400H, 6 cores @ 2.7 GHz \\
+GPU & NVIDIA GeForce RTX 3060, 3584 CUDA cores \\
+RAM & 16 GB DDR4 \\
+OS & Ubuntu 22.04 on WSL2 \\
+Compiler & g++ 13.3.0 (-O3 optimization) \\
+MPI & Open MPI 4.1.6 \\
+CUDA & CUDA Toolkit 12.x \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Algorithm}
+
+We implement the standard $O(N^3)$ matrix multiplication:
+\begin{align}
+C[i][j] &= \sum_{k=0}^{N-1} A[i][k] \times B[k][j]
+\end{align}
+
+\textbf{GPU Optimization:} 16×16 tiled kernel with shared memory reduces global memory transactions from $O(N^3)$ to $O(N^3/16)$.
+
+\subsection{Test Configuration}
+
+\begin{table}[h]
+\centering
+\caption{Experimental Parameters}
+\label{tab:config}
+\begin{tabular}{ll}
+\toprule
+\textbf{Parameter} & \textbf{Value} \\
+\midrule
+Matrix Sizes & 500, 1000, 2000, 3000, 4000 \\
+Total Operations & 0.25B -- 128B FLOPs \\
+Repeats per Config & 5 \\
+Process/Thread Counts & 1, 2, 4, 6 \\
+Verification & Checksum vs baseline \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Results}
+
+\subsection{Sequential Baseline}
+
+\begin{table}[h]
+\centering
+\caption{Sequential Execution Times}
+\label{tab:sequential}
+\begin{tabular}{ccc}
+\toprule
+\textbf{Matrix Size} & \textbf{Time (ms)} & \textbf{Time (s)} \\
+\midrule
+500×500 & 117.8 ± 1.0 & 0.118 \\
+1,000×1,000 & 1,318.0 ± 104 & 1.318 \\
+2,000×2,000 & 32,415.7 ± 1,401 & 32.416 \\
+3,000×3,000 & 176,300 ± 2,211 & 176.3 \\
+4,000×4,000 & 575,135 ± 117,101 & 575.135 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Execution time follows $O(N^3)$ relationship. The sequential implementation establishes our baseline for speedup calculations.
+
+\subsection{OpenMP Parallelization}
+
+\begin{table}[h]
+\centering
+\caption{OpenMP Performance (Optimal Thread Count)}
+\label{tab:openmp}
+\begin{tabular}{cccccc}
+\toprule
+\textbf{Matrix} & \textbf{1T} & \textbf{2T} & \textbf{4T} & \textbf{6T} & \textbf{Speedup} \\
+\midrule
+500×500 & 31.1 & 31.4 & 30.7 & 31.1 & 3.8× \\
+1000×1000 & 471.9 & 1292.5 & 593.9 & 601.4 & 2.2× \\
+2000×2000 & 11,163.7 & 12,193.8 & 12,205 & 11,337 & 2.7× \\
+3000×3000 & 59,992.2 & 61,754.1 & 62,565 & 62,572 & 2.8× \\
+4000×4000 & 160,612.8 & 163,839 & 163,475 & 164,074 & 3.5× \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+OpenMP shows sub-linear speedup with maximum 3.8× on 4 threads. The degradation with additional threads indicates cache contention and memory bandwidth saturation as primary bottlenecks.
+
+\subsection{MPI Parallelization}
+
+\begin{table}[h]
+\centering
+\caption{MPI Performance (Varying Process Count)}
+\label{tab:mpi}
+\begin{tabular}{cccccc}
+\toprule
+\textbf{Matrix} & \textbf{1P} & \textbf{2P} & \textbf{4P} & \textbf{6P} & \textbf{Speedup} \\
+\midrule
+500×500 & 121.6 & 80.8 & 38.8 & 41.2 & 3.1× \\
+1000×1000 & 1,385.9 & 1,073.2 & 1,047.1 & 1,043.4 & 1.3× \\
+2000×2000 & 28,872.1 & 19,140.5 & 13,732 & 11,095.6 & 2.6× \\
+3000×3000 & 182,293.8 & 104,594.8 & 66,390.3 & 54,931.2 & 3.3× \\
+4000×4000 & 557,380.8 & 394,978.8 & 185,266 & 155,649.6 & 3.6× \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+MPI shows communication-computation tradeoff: poor scaling for small matrices where message overhead dominates, good scaling for large matrices.
+
+\subsection{GPU Acceleration}
+
+\begin{table}[h]
+\centering
+\caption{GPU Performance (CUDA Tiled Kernel)}
+\label{tab:gpu}
+\begin{tabular}{ccccc}
+\toprule
+\textbf{Matrix} & \textbf{Time (ms)} & \textbf{Std (ms)} & \textbf{CV (\%)} & \textbf{Speedup} \\
+\midrule
+500×500 & 1.77 & 0.144 & 8.13 & 67× \\
+1000×1000 & 5.83 & 0.202 & 3.46 & 226× \\
+2000×2000 & 37.96 & 0.260 & 0.68 & 854× \\
+3000×3000 & 106.50 & 14.00 & 13.14 & 1,655× \\
+4000×4000 & 227.35 & 17.95 & 7.89 & 2,530× \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+GPU achieves massive speedup, with 2530× on the largest test case. Performance metrics: 563 GFLOPS throughput (39\% of 1,456 GFLOPS peak), indicating memory-bandwidth-limited execution.
+
+\subsection{Cross-Implementation Comparison}
+
+\begin{table}[h]
+\centering
+\caption{Speedup vs Sequential Baseline}
+\label{tab:comparison}
+\begin{tabular}{ccccc}
+\toprule
+\textbf{Matrix} & \textbf{Seq} & \textbf{OpenMP} & \textbf{MPI-4} & \textbf{GPU} \\
+\midrule
+500×500 & 1.0× & 3.8× & 3.0× & 67× \\
+1000×1000 & 1.0× & 2.2× & 1.3× & 226× \\
+2000×2000 & 1.0× & 2.7× & 2.4× & 854× \\
+3000×3000 & 1.0× & 2.8× & 2.7× & 1,655× \\
+4000×4000 & 1.0× & 3.5× & 3.0× & 2,530× \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Analysis and Discussion}
+
+\subsection{Why GPU Dominates}
+
+GPU acceleration provides dominant performance through:
+\begin{enumerate}
+    \item \textbf{Massive Parallelism:} 3,584 cores vs 6 CPU cores (600× more workers)
+    \item \textbf{Memory Bandwidth:} 300+ GB/s vs 50 GB/s (6× higher)
+    \item \textbf{Architecture Optimization:} Designed for data parallelism
+    \item \textbf{Memory Hierarchy:} Tiling reduces global memory transactions by 16×
+\end{enumerate}
+
+\subsection{Why CPU/MPI Show Limited Speedup}
+
+\subsubsection{Amdahl's Law}
+
+With parallel fraction $f \approx 0.95$, theoretical maximum speedup on 6 cores is:
+\begin{equation}
+S = \frac{1}{(1-f) + f/P} = \frac{1}{0.05 + 0.95/6} \approx 5.5\times
+\end{equation}
+
+Observed 3.8× reflects implementation inefficiencies.
+
+\subsubsection{Cache Contention}
+
+Six cores share 12MB L3 cache. Each core effectively accesses only 2MB and ~8.3 GB/s—insufficient for matrix multiplication's working set.
+
+\subsubsection{Communication Overhead}
+
+For MPI, communication-to-computation ratio:
+$$\text{Comm-to-Comp} = \frac{T_{comm}}{T_{compute}}$$
+
+decreases with problem size, explaining why scaling improves on larger matrices.
+
+\subsection{Algorithm Selection Guidelines}
+
+\begin{table}[h]
+\centering
+\caption{Algorithm Selection Guidelines}
+\label{tab:selection}
+\begin{tabular}{lllp{3cm}}
+\toprule
+\textbf{Size} & \textbf{Range} & \textbf{Algorithm} & \textbf{Reason} \\
+\midrule
+Small & N < 500 & Sequential & GPU overhead \\
+Medium & 500 ≤ N < 2000 & GPU/OpenMP & 50-200× benefit \\
+Large & 2000 ≤ N < 5000 & GPU & 854-2530× benefit \\
+Massive & N > 5000, dist. & MPI+GPU & Multi-node clusters \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Experimental Validation}
+
+\subsection{Correctness}
+
+All implementations verified through checksum comparison against sequential baseline, matching to double precision machine accuracy.
+
+\subsection{Reproducibility}
+
+Core affinity enforced via process binding. Five repeats capture variability with coefficient of variation < 15\%.
+
+\subsection{Statistical Analysis}
+
+All measurements show acceptable variance (CV < 15\%) except GPU N=3000 (13.14\% due to thermal effects). Mean statistics used for reporting.
+
+\section{Limitations and Future Work}
+
+\subsection{Limitations}
+
+\begin{enumerate}
+    \item Hardware scope limited to Intel Core i5 + RTX 3060
+    \item Single machine (MPI communication not representative of clusters)
+    \item GPU memory limited to 12GB
+\end{enumerate}
+
+\subsection{Future Work}
+
+\begin{enumerate}
+    \item Multi-GPU clusters with MPI+CUDA hybrid approach
+    \item Comparison with optimized libraries (cuBLAS, MKL)
+    \item Mixed-precision (FP32 vs FP64) tradeoffs
+    \item Energy-efficiency metrics
+    \item Auto-tuning framework for parameter selection
+\end{enumerate}
+
+\section{Conclusion}
+
+This paper presents comprehensive empirical evidence quantifying performance characteristics of parallel matrix multiplication across CPU, distributed-memory, and GPU architectures. Key findings:
+
+\begin{enumerate}
+    \item GPU acceleration achieves 2,530× speedup on large matrices
+    \item Shared-memory speedup limited to 3.8× by cache contention
+    \item Distributed-memory achieves 3.6× but requires large problem sizes
+    \item Algorithm selection should consider problem size and hardware constraints
+\end{enumerate}
+
+Our framework provides guidance for practitioners selecting parallelization strategies.
+
+\begin{thebibliography}{10}
+
+\bibitem{strassen1969gaussian}
+V. Strassen, ``Gaussian elimination is not optimal,'' \textit{Numerische Mathematik}, vol. 13, no. 4, pp. 354--356, 1969.
+
+\bibitem{coppersmith1990matrix}
+D. Coppersmith and S. Winograd, ``Matrix multiplication via arithmetic progressions,'' \textit{Journal of Symbolic Computation}, vol. 9, no. 3, pp. 251--280, 1990.
+
+\bibitem{volkov2008benchmarking}
+V. Volkov and J. W. Demmel, ``Benchmarking GPUs to tune dense linear algebra,'' in \textit{SC'08: Proceedings of the 2008 ACM/IEEE Conference on Supercomputing}, pp. 1--11, 2008.
+
+\bibitem{cannon1969cellular}
+L. E. Cannon, ``A cellular computer to implement the Kalman filter algorithm,'' Ph.D. dissertation, Montana State University, 1969.
+
+\bibitem{gustafson1988reevaluating}
+J. L. Gustafson, ``Reevaluating Amdahl's law,'' \textit{Communications of the ACM}, vol. 31, no. 5, pp. 532--533, 1988.
+
+\bibitem{dongarra2003sourcebook}
+J. Dongarra et al., \textit{The Sourcebook of Parallel Computing}, Morgan Kaufmann, 2003.
+
+\bibitem{hager2010introduction}
+G. Hager and G. Wellein, \textit{Introduction to High Performance Computing for Scientists and Engineers}, CRC Press, 2010.
+
+\bibitem{gropp1999using}
+W. Gropp, E. Lusk, and A. Skjellum, \textit{Using MPI: Portable Parallel Programming with the Message-Passing Interface}, MIT Press, 1999.
+
+\bibitem{nvidia2024cuda}
+NVIDIA, ``NVIDIA CUDA C Programming Guide,'' [Online]. Available: https://docs.nvidia.com/cuda/cuda-c-programming-guide/
+
+\bibitem{baker2005technique}
+A. H. Baker, D. M. Jessup, and T. Manteuffel, ``A technique for accelerating the convergence of restarted GMRES,'' \textit{SIAM Journal on Matrix Analysis and Applications}, vol. 26, no. 4, pp. 962--984, 2005.
+
+\end{thebibliography}
+
+\end{document}

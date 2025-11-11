@@ -1,0 +1,13 @@
+test_name,matrix_size,impl,run,duration_s,avg_power_w,min_power_w,max_power_w,stdev_power_w,total_energy_j
+gpu_tiled_n1000_run1,1000,gpu_tiled_matmul,1,1.004,12.569,6.680,14.040,2.717,12.619
+gpu_tiled_n1000_run2,1000,gpu_tiled_matmul,2,.320,8.021,6.710,14.440,2.566,2.566
+gpu_tiled_n1000_run3,1000,gpu_tiled_matmul,3,.299,12.334,6.740,14.900,3.102,3.687
+gpu_tiled_n2000_run1,2000,gpu_tiled_matmul,1,.441,13.574,6.910,15.370,1.899,5.986
+gpu_tiled_n2000_run2,2000,gpu_tiled_matmul,2,.413,12.484,6.810,15.640,3.014,5.155
+gpu_tiled_n2000_run3,2000,gpu_tiled_matmul,3,.386,13.652,6.820,15.620,1.770,5.269
+gpu_tiled_n3000_run1,3000,gpu_tiled_matmul,1,.554,13.251,6.810,20.990,3.887,7.341
+gpu_tiled_n3000_run2,3000,gpu_tiled_matmul,2,.607,14.437,6.840,20.070,2.831,8.763
+gpu_tiled_n3000_run3,3000,gpu_tiled_matmul,3,.581,13.307,6.880,20.520,3.920,7.731
+gpu_tiled_n4000_run1,4000,gpu_tiled_matmul,1,.891,15.427,8.500,57.400,5.536,13.745
+gpu_tiled_n4000_run2,4000,gpu_tiled_matmul,2,1.166,13.715,6.860,59.180,5.335,15.991
+gpu_tiled_n4000_run3,4000,gpu_tiled_matmul,3,.852,14.919,7.390,25.080,3.794,12.710
