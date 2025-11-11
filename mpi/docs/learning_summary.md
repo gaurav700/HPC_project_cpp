@@ -1,53 +1,4 @@
-# Day 2 Learning Summary — MPI
-
-## 🧩 MPI Concepts
-- MPI = Message Passing Interface → distributed-memory parallelism.  
-- Each process has its own memory space; communication via messages.  
-- Used `MPI_Comm_rank`, `MPI_Comm_size`, `MPI_Bcast`, `MPI_Gatherv`.  
-- Learned difference between **OpenMP (threads)** and **MPI (processes)**.
-
----
-
-## 💻 Parallel Algorithm Design
-- Implemented row-wise matrix partitioning.  
-- Ensured load balance via `rowsPerProc + (rank < rem)`.  
-- Measured timing with `MPI_Wtime()` and synchronized with `MPI_Barrier()`.  
-- Understood why communication cost can erase scaling for small matrices.
-
----
-
-## ⚙️ Benchmarking Skills
-- Used automated scripts for parameter sweeps and data logging.  
-- Added core binding (`--bind-to core`) for reproducibility.  
-- Collected repeated runs to compute mean + std → scientific accuracy.  
-- Understood metrics: **Speedup**, **Efficiency**, **Stability**.
-
----
-
-## 📊 Performance Interpretation
-- Scaling good for large N (≥ 2000), poor for small N.  
-- Efficiency drops with more processes → Amdahl’s Law.  
-- Memory bandwidth and communication dominant bottlenecks.  
-- Recognized cross-over point where MPI ≈ OpenMP.
-
----
-
-## 🧠 System Understanding
-- Learned to monitor resources: `htop`, `nvidia-smi`, `free -h`.  
-- Confirmed MPI uses CPU cores only → GPU remains idle until CUDA is used.  
-- Gained confidence interpreting hardware-level performance metrics.
-
----
-
-## 🧪 Research Mindset
-- Designed controlled experiments → collected data → analyzed trends.  
-- Validated results statistically → ensured reproducibility.  
-- Connected empirical data to theoretical laws (Amdahl).  
-- Prepared for next phase → GPU parallelism and hybrid MPI + OpenMP.
-
----
-
-# Learning Summary — Message Passing Interface (MPI) - Day 2
+# Learning Summary — Message Passing Interface (MPI)
 
 ## � MPI Concepts & Fundamentals
 
@@ -379,5 +330,5 @@ Where:
 
 ---
 
-*Learning Summary for Day 2: Message Passing Interface (MPI)*  
+*Learning Summary for Message Passing Interface (MPI)*  
 *November 10, 2025*
