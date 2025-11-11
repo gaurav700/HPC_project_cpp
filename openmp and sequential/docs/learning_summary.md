@@ -29,14 +29,6 @@ export OMP_SCHEDULE=static    # Thread scheduling strategy
 
 ## 💻 Matrix Multiplication Parallelization
 
-### Sequential Baseline
-```cpp
-for (int i = 0; i < N; ++i)
-    for (int j = 0; j < N; ++j)
-        for (int k = 0; k < N; ++k)
-            C[i][j] += A[i][k] * B[k][j];
-```
-
 ### OpenMP Parallel Version
 ```cpp
 #pragma omp parallel for collapse(2)
@@ -259,5 +251,5 @@ OpenMP is the gateway to parallel programming. It's simple enough for beginners 
 
 ---
 
-*Learning Summary for Day 1: OpenMP*  
+*Learning Summary for OpenMP*  
 *November 10, 2025*
