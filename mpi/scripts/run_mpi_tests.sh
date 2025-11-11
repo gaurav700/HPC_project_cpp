@@ -28,7 +28,7 @@ OUT=results/mpi_repeats.csv
 echo "framework,impl,n,processes,run,time_s,checksum" > "$OUT"
 
 # Test parameters
-ns=(500 1000 2000)
+ns=(500 1000 2000 3000 4000)
 impls=("mpi_matmul" "mpi_summa")
 process_counts=(4)  # default: 4 processes (2x2 grid). Override with MPI_PROCESSES env var
 if [ -n "${MPI_PROCESSES:-}" ]; then

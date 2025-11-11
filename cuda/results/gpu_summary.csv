@@ -1,6 +1,6 @@
 impl,n,kernel_mean_ms,kernel_std_ms,runs,kernel_cv_%
-gpu_tiled_matmul,500,1.77,0.143852,5,8.13
-gpu_tiled_matmul,1000,5.8332,0.201609,5,3.46
-gpu_tiled_matmul,2000,37.9606,0.259823,5,0.68
-gpu_tiled_matmul,3000,106.4968,13.99694,5,13.14
-gpu_tiled_matmul,4000,227.3504,17.945731,5,7.89
+gpu_tiled_matmul,500,1.7986,0.432015,5,24.02
+gpu_tiled_matmul,1000,6.8288,2.078406,5,30.44
+gpu_tiled_matmul,2000,38.4152,0.85418,5,2.22
+gpu_tiled_matmul,3000,104.5332,10.860458,5,10.39
+gpu_tiled_matmul,4000,229.2828,0.224055,5,0.1

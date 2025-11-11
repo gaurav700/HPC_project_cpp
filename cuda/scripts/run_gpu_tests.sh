@@ -18,14 +18,6 @@ if [ ! -f gpu_tiled_matmul ] || [ "${FORCE_REBUILD:-0}" = "1" ]; then
     nvcc -O3 -arch=${NVCC_ARCH} gpu_tiled_matmul.cu -o gpu_tiled_matmul 2>/dev/null || echo "⚠️  Fallback compile failed for gpu_tiled_matmul"
   }
 fi
-
-if [ ! -f gpu_cublas_matmul ] || [ "${FORCE_REBUILD:-0}" = "1" ]; then
-  echo "  - compiling gpu_cublas_matmul (arch=${NVCC_ARCH})..."
-  nvcc -O3 $gencode_flag gpu_cublas_matmul.cu -lcublas -o gpu_cublas_matmul 2>/dev/null || {
-    echo "⚠️  Failed to compile gpu_cublas_matmul with ${gencode_flag}, trying -arch=${NVCC_ARCH}..."
-    nvcc -O3 -arch=${NVCC_ARCH} gpu_cublas_matmul.cu -lcublas -o gpu_cublas_matmul 2>/dev/null || echo "⚠️  Fallback compile failed for gpu_cublas_matmul"
-  }
-fi
 cd ..
 
 # Create results directory
@@ -37,12 +29,12 @@ echo "framework,impl,n,run,kernel_ms,checksum" > "$OUT"
 
 # Test parameters
 ns=(500 1000 2000 3000 4000)
-# include both tiled kernel and cuBLAS baseline
-impls=("gpu_tiled_matmul" "gpu_cublas_matmul")
+# Tiled kernel only
+impls=("gpu_tiled_matmul")
 repeats=5
 
 echo "🚀 Starting GPU benchmark tests..."
-echo "Configurations: ${#ns[@]} matrix sizes × ${#impls[@]} implementation × $repeats repeats"
+echo "Configurations: ${#ns[@]} matrix sizes × ${#impls[@]} implementations × $repeats repeats"
 echo ""
 
 # Main benchmarking loop
