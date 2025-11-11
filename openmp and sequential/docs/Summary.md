@@ -42,42 +42,6 @@ Key Concepts:
 | **Repeats per Config** | 5 runs (for statistical analysis) |
 | **Timing Method** | `std::chrono::high_resolution_clock` |
 | **Validation** | Numerical checksum compared across runs |
-Standard O(N³) matrix multiplication without parallelism:
-```cpp
-for (int i = 0; i < N; ++i)
-    for (int j = 0; j < N; ++j)
-        for (int k = 0; k < N; ++k)
-            C[i][j] += A[i][k] * B[k][j];
-```
-
-- Baseline for all comparisons
-- Uses `std::chrono::high_resolution_clock` for precise timing
-- Verified with numerical checksum
-
-Compiled with:
-```bash
-g++ -O3 -march=native src/sequential_matmul.cpp -o seq_mat
-```
-
----
-
-### 2️⃣ OpenMP Parallel Version — `openmp_matmul.cpp`
-```cpp
-#pragma omp parallel for collapse(2)
-for (int i = 0; i < N; ++i)
-    for (int j = 0; j < N; ++j)
-        for (int k = 0; k < N; ++k)
-            C[i][j] += A[i][k] * B[k][j];
-```
-
-- OpenMP `#pragma` parallelizes outer loop across threads
-- Thread count controlled via `OMP_NUM_THREADS` environment variable
-- Tested with 1, 2, 4, 6 threads
-
-Compiled with:
-```bash
-g++ -O3 -march=native -fopenmp src/openmp_matmul.cpp -o omp_mat
-```
 
 ---
 
@@ -319,15 +283,6 @@ This suggests approximately 75% of computation is parallelizable and ~25% is inh
 
 ---
 
-## 📝 References
-
-- OpenMP Documentation: https://www.openmp.org/
-- Amdahl's Law: https://en.wikipedia.org/wiki/Amdahl%27s_law
-- Matrix Multiplication Optimization: https://en.wikipedia.org/wiki/Matrix_multiplication_algorithm
-- Parallel Computing Concepts: http://www.parallel.co.uk/
-  
----
-
 ## 🧱 Implementation Summary
 
 ### 1️⃣ Sequential Matrix Multiplication — `sequential_matmul.cpp`
@@ -472,11 +427,13 @@ Generated using Python + Matplotlib.
 
 ---
 
-## 🚀 Next Steps
-1. Implement **MPI** version for distributed-memory comparison.  
-2. Extend benchmark for hybrid **MPI + OpenMP** setups.  
-3. Compare and plot **Sequential vs OpenMP vs MPI** in Day 2 analysis.
+## 📝 References
 
+- OpenMP Documentation: https://www.openmp.org/
+- Amdahl's Law: https://en.wikipedia.org/wiki/Amdahl%27s_law
+- Matrix Multiplication Optimization: https://en.wikipedia.org/wiki/Matrix_multiplication_algorithm
+- Parallel Computing Concepts: http://www.parallel.co.uk/
+  
 ---
 
 *Prepared by Gaurav — MS CS, NJIT | HPC Research Project 2025*  
