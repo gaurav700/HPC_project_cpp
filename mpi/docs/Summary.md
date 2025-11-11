@@ -278,49 +278,6 @@ This suggests approximately **85% of computation is parallelizable**, with **15%
 
 ---
 
-## 🚀 Next Steps & Future Work
-
-1. **Hybrid MPI+OpenMP** — Combine distributed and shared memory parallelism
-2. **Network Testing** — Run on multi-node cluster to measure network effects
-3. **Algorithm Optimization** — Blocked matrix multiplication for cache efficiency
-4. **Performance Profiling** — Use MPI profiling tools to breakdown communication vs computation
-5. **GPU Acceleration** — CUDA kernels + MPI for accelerated computing
-
----
-
-## 📚 References
-
-- Open MPI Documentation: https://www.open-mpi.org/
-- MPI Standard: https://www.mpi-forum.org/
-- Message Passing Interface: https://en.wikipedia.org/wiki/Message_Passing_Interface
-- Distributed Computing: https://en.wikipedia.org/wiki/Distributed_computing
-- Amdahl's Law: https://en.wikipedia.org/wiki/Amdahl%27s_law
-
----
-
-## ✅ Conclusions
-
-1. **MPI successfully parallelized matrix multiplication** with verified correctness (checksum validation).
-
-2. **Strong scaling demonstrated** for large matrices (3.58× speedup with 6 processes on 4000×4000).
-
-3. **Communication overhead significant** for small matrices but amortized at larger scales.
-
-4. **Comparable performance to OpenMP** for large compute-intensive workloads, with advantage: scalability to distributed systems.
-
-5. **Efficiency limited by** memory bandwidth (not compute-bound), as predicted by Amdahl's Law analysis.
-
-6. **Benchmarking framework established** for performance characterization and reproducibility.
-
----
-
-*Report Generated: November 10, 2025*  
-*Project: HPC Benchmarking Suite — Sequential, OpenMP, and MPI Comparison*  
-*Author: Gaurav | MS CS, NJIT | High-Performance Computing Research*
-
-
----
-
 ## 🧪 Benchmark Automation
 
 ### Script: `mpi/scripts/run_mpi_tests.sh`
@@ -383,6 +340,16 @@ Trends:
 3. Efficiency limited by communication and memory I/O.  
 4. OpenMP remains superior for small N; MPI competitive for large N.  
 5. Experimental results align with theoretical parallel models.
+
+---
+
+## 📚 References
+
+- Open MPI Documentation: https://www.open-mpi.org/
+- MPI Standard: https://www.mpi-forum.org/
+- Message Passing Interface: https://en.wikipedia.org/wiki/Message_Passing_Interface
+- Distributed Computing: https://en.wikipedia.org/wiki/Distributed_computing
+- Amdahl's Law: https://en.wikipedia.org/wiki/Amdahl%27s_law
 
 ---
 
