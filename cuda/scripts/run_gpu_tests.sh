@@ -6,12 +6,27 @@ cd ~/hpc_project_cpp/cuda
 
 # Compile GPU kernels if not already compiled
 echo "🔧 Building GPU kernels..."
-if [ ! -f src/gpu_tiled_matmul ]; then
-    cd src
-    echo "  - compiling gpu_tiled_matmul..."
-    nvcc -O3 -arch=sm_70 gpu_tiled_matmul.cu -o gpu_tiled_matmul 2>/dev/null || echo "⚠️  Failed to compile gpu_tiled_matmul"
-    cd ..
+NVCC_ARCH=${NVCC_ARCH:-sm_86}
+# Use gencode for better control; derive compute from arch (sm_86 -> compute_86)
+compute_cap=${NVCC_ARCH#sm_}
+gencode_flag="-gencode=arch=compute_${compute_cap},code=sm_${compute_cap}"
+cd src
+if [ ! -f gpu_tiled_matmul ] || [ "${FORCE_REBUILD:-0}" = "1" ]; then
+  echo "  - compiling gpu_tiled_matmul (arch=${NVCC_ARCH})..."
+  nvcc -O3 $gencode_flag gpu_tiled_matmul.cu -o gpu_tiled_matmul 2>/dev/null || {
+    echo "⚠️  Failed to compile gpu_tiled_matmul with ${gencode_flag}, trying -arch=${NVCC_ARCH}..."
+    nvcc -O3 -arch=${NVCC_ARCH} gpu_tiled_matmul.cu -o gpu_tiled_matmul 2>/dev/null || echo "⚠️  Fallback compile failed for gpu_tiled_matmul"
+  }
 fi
+
+if [ ! -f gpu_cublas_matmul ] || [ "${FORCE_REBUILD:-0}" = "1" ]; then
+  echo "  - compiling gpu_cublas_matmul (arch=${NVCC_ARCH})..."
+  nvcc -O3 $gencode_flag gpu_cublas_matmul.cu -lcublas -o gpu_cublas_matmul 2>/dev/null || {
+    echo "⚠️  Failed to compile gpu_cublas_matmul with ${gencode_flag}, trying -arch=${NVCC_ARCH}..."
+    nvcc -O3 -arch=${NVCC_ARCH} gpu_cublas_matmul.cu -lcublas -o gpu_cublas_matmul 2>/dev/null || echo "⚠️  Fallback compile failed for gpu_cublas_matmul"
+  }
+fi
+cd ..
 
 # Create results directory
 mkdir -p results
@@ -22,7 +37,8 @@ echo "framework,impl,n,run,kernel_ms,checksum" > "$OUT"
 
 # Test parameters
 ns=(500 1000 2000 3000 4000)
-impls=("gpu_tiled_matmul")
+# include both tiled kernel and cuBLAS baseline
+impls=("gpu_tiled_matmul" "gpu_cublas_matmul")
 repeats=5
 
 echo "🚀 Starting GPU benchmark tests..."
