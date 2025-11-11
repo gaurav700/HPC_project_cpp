@@ -319,35 +319,20 @@ This suggests approximately 75% of computation is parallelizable and ~25% is inh
 
 ---
 
-## 🚀 Next Steps & Future Work
-
-1. **Implement MPI Version** — Distributed memory approach for comparison
-2. **Hybrid MPI + OpenMP** — Combine both parallelism models
-3. **Algorithm Optimization** — Blocked matrix multiplication for better cache reuse
-4. **GPU Acceleration** — CUDA implementation for compute-bound comparison
-5. **Performance Profiling** — Use Intel VTune or perf for detailed analysis
-
----
-
 ## 📝 References
 
 - OpenMP Documentation: https://www.openmp.org/
 - Amdahl's Law: https://en.wikipedia.org/wiki/Amdahl%27s_law
 - Matrix Multiplication Optimization: https://en.wikipedia.org/wiki/Matrix_multiplication_algorithm
 - Parallel Computing Concepts: http://www.parallel.co.uk/
-
----
-
-*Report Generated: November 10, 2025*  
-*Project: HPC Benchmarking Suite — Sequential, OpenMP, and MPI Comparison*  
-*Author: Gaurav | MS CS, NJIT | High-Performance Computing Research*
-
+  
 ---
 
 ## 🧱 Implementation Summary
 
 ### 1️⃣ Sequential Matrix Multiplication — `sequential_matmul.cpp`
 Standard O(N³) matrix multiplication without parallelism.cpp
+```cpp
 for (int i = 0; i < N; ++i)
     for (int j = 0; j < N; ++j)
         for (int k = 0; k < N; ++k)
